@@ -64,14 +64,12 @@ void Top::PositionBasculTele(){
         bascul_value -=0.5;
     }
 
-    bascul_value_aprox = abs(bascul_value)-abs(angle_encoder_feeder);
+    bascul_value_aprox = abs(bascul_value)-abs(angle_encoder_lancer);
+
     frc::SmartDashboard::PutNumber("basculencoder", angle_encoder_lancer);
     frc::SmartDashboard::PutNumber("basculValue", bascul_value);
-    std::cout<<"distance" <<angle_encoder_lancer <<"\n";
-    //std::cout<<"anglevalue" <<bascul_value <<"\n";  
+    frc::SmartDashboard::PutNumber("valueArox", bascul_value_aprox);  
     
-    
-
     if(bascul_value > angle_encoder_lancer && bascul_value_aprox < -10){
         //bascule monte (pointe vers haut)
         motor_bascul_left.Set(-0.2);
@@ -84,7 +82,7 @@ void Top::PositionBasculTele(){
         motor_bascul_right.Set(-0.2);
         
     }
-    if ( bascul_value_aprox <= 1 && bascul_value_aprox >= 10){
+    if ( bascul_value_aprox <= 10 && bascul_value_aprox >= 0){
             motor_bascul_left.Set(0.00001);
             motor_bascul_right.Set(-0.00001);
     }
