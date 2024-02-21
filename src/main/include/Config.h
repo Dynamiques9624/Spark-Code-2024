@@ -43,7 +43,7 @@
 
 //valeur de encoder du feeder
 //prendre anneau
-#define ENCODER_FEEDER_TAKE_VALUE 192
+#define ENCODER_FEEDER_TAKE_VALUE 192 //189 valeur peut etre
 //drop anneau dans lancer
 #define ENCODER_FEEDER_LANCER_VALUE -6
 

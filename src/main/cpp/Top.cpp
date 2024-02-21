@@ -12,8 +12,8 @@ void Top:: handleTopInit(){
     motor_bascul_left.RestoreFactoryDefaults();
     motor_bascul_right.RestoreFactoryDefaults();
 
-    bascul_value = -30;
-
+    bascul_value = -20;
+  
 }
 
 void Top::handleEncoderValue(){
@@ -25,35 +25,10 @@ void Top::handleEncoderValue(){
 
     frc::SmartDashboard::PutBoolean("encoder feeder", connect_encoder_feeder);
     frc::SmartDashboard::PutBoolean("encoder lancer", connect_encoder_lancer);
-    
+    frc::SmartDashboard::PutNumber("encoFeederVal", angle_encoder_feeder);
 }
 
 
-void Top::PositionFeeder(){ 
-    RB = controller.GetRightBumper();
-    LB = controller.GetLeftBumper();
-    RT = controller.GetRightTriggerAxis();
-    if(LB){
-        if(angle_encoder_feeder < ENCODER_FEEDER_TAKE_VALUE){
-             motor_feeder.Set(-MOTOR_FEEDER_SPEED);
-        }   
-    }
-    if(RB){
-        if(angle_encoder_feeder > ENCODER_FEEDER_LANCER_VALUE){
-            motor_feeder.Set(MOTOR_FEEDER_SPEED);  
-        }
-    }
-
-    if(angle_encoder_feeder < ENCODER_FEEDER_LANCER_VALUE){
-        motor_feeder.Set(0.00001);
-        feeder_possition_lancer_state = 1;
-    }
-
-    if(angle_encoder_feeder > ENCODER_FEEDER_TAKE_VALUE){
-        motor_feeder.Set(0.00001);
-           feeder_possition_lancer_state = 0;
-    }
-}
 void Top::PositionBasculTele(){
     pov = controller.GetPOV();
 
@@ -70,23 +45,23 @@ void Top::PositionBasculTele(){
     frc::SmartDashboard::PutNumber("basculValue", bascul_value);
     frc::SmartDashboard::PutNumber("valueArox", bascul_value_aprox);  
     
-    if(bascul_value > angle_encoder_lancer && bascul_value_aprox < -10){
+    if(bascul_value > angle_encoder_lancer && bascul_value_aprox < -2){
         //bascule monte (pointe vers haut)
-        motor_bascul_left.Set(-0.2);
-        motor_bascul_right.Set(0.2);
+        motor_bascul_left.Set(0);
+        motor_bascul_right.Set(0);
         
     }
-    if(bascul_value < angle_encoder_lancer && bascul_value_aprox > 10){
+    if(bascul_value < angle_encoder_lancer && bascul_value_aprox > 2){
         //bascule descend (point vers bas)
         motor_bascul_left.Set(0.2);
         motor_bascul_right.Set(-0.2);
         
     }
-    if ( bascul_value_aprox <= 10 && bascul_value_aprox >= 0){
+    if ( bascul_value_aprox <= 2 && bascul_value_aprox >= 0){
             motor_bascul_left.Set(0.00001);
             motor_bascul_right.Set(-0.00001);
     }
-    if ( bascul_value_aprox >= -10 && bascul_value_aprox < 0 ){
+    if ( bascul_value_aprox >= -2 && bascul_value_aprox < 0 ){
             motor_bascul_left.Set(0.00001);
             motor_bascul_right.Set(-0.00001);
     }
@@ -102,24 +77,50 @@ void Top::intakeAnneau(){
 
     RT = controller.GetRightTriggerAxis();
     
-
     if (RT == 1){
         m_motor_intake.Set(-0.5);
     }
     if (anneau_limit_Switch.Get() && RT != 1){
         m_motor_intake.Set(0);
+        
     }
-    if(feeder_possition_lancer_state == 0 && anneau_limit_Switch.Get() == false ){
+    if(feeder_possition_lancer_state == 0 && anneau_limit_Switch.Get() == false && RT != 1 ){
         m_motor_intake.Set(0.2);
         
     }
 }
 
+void Top::PositionFeeder(){ 
+    RB = controller.GetRightBumper();
+    LB = controller.GetLeftBumper();
+    RT = controller.GetRightTriggerAxis();
+    if(LB){ //descend
+        if(angle_encoder_feeder < ENCODER_FEEDER_TAKE_VALUE){
+             motor_feeder.Set(-MOTOR_FEEDER_SPEED);
+        }   
+    }
+    if(RB){ //monte
+        if(angle_encoder_feeder > ENCODER_FEEDER_LANCER_VALUE){
+            motor_feeder.Set(MOTOR_FEEDER_SPEED);  
+        }
+    }
+
+    if(angle_encoder_feeder < ENCODER_FEEDER_LANCER_VALUE){
+        motor_feeder.Set(0);
+        feeder_possition_lancer_state = 1;
+    }
+
+    if(angle_encoder_feeder > ENCODER_FEEDER_TAKE_VALUE){
+        motor_feeder.Set(0);
+           feeder_possition_lancer_state = 0;
+    }
+}
+
 void Top::handleTopTaskTeleop(){
     handleEncoderValue();
-    //handlelancerSpeed();
-    //PositionFeeder();
+    handlelancerSpeed();
+    PositionFeeder();
     PositionBasculTele();
-    //intakeAnneau();
+    intakeAnneau();
 
 }
