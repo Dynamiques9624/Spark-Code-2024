@@ -1,11 +1,10 @@
 #include "Top.h"
 
 void Top:: handleTopInit(){
+    feederInit();
 
-    m_dutyCycleEncoder_feeder.SetDistancePerRotation(360);
     m_dutyCycleEncoder_lancer.SetDistancePerRotation(360);
 
-    motor_feeder.RestoreFactoryDefaults();
     motor_lancer_an_left.RestoreFactoryDefaults();
     motor_lancer_an_right.RestoreFactoryDefaults();
 
@@ -13,31 +12,60 @@ void Top:: handleTopInit(){
     motor_bascul_right.RestoreFactoryDefaults();
 
     bascul_value = -20;
+    set_predefine_loaded = false;
+
+    timer_started_propul = false;
+    timer_started_fire = false;
+    
+    bascul_target_position = false;
   
 }
 
 void Top::handleEncoderValue(){
-    connect_encoder_feeder = m_dutyCycleEncoder_feeder.IsConnected();
+    
     connect_encoder_lancer = m_dutyCycleEncoder_lancer.IsConnected();
-
-    angle_encoder_feeder = m_dutyCycleEncoder_feeder.GetDistance();
     angle_encoder_lancer = m_dutyCycleEncoder_lancer.GetDistance();
-
-    frc::SmartDashboard::PutBoolean("encoder feeder", connect_encoder_feeder);
+    frc::SmartDashboard::PutNumber("encoLancerVal", angle_encoder_lancer);
     frc::SmartDashboard::PutBoolean("encoder lancer", connect_encoder_lancer);
-    frc::SmartDashboard::PutNumber("encoFeederVal", angle_encoder_feeder);
+    
+}
+
+void Top::handleMotorTemp(){
+    
+    temp_m_lancer_left = motor_lancer_an_left.GetMotorTemperature();
+    temp_m_lancer_right = motor_lancer_an_right.GetMotorTemperature();
+    temp_m_bascul_left =  motor_bascul_left.GetMotorTemperature();
+    temp_m_bascul_right =  motor_bascul_right.GetMotorTemperature();
+
+    frc::SmartDashboard::PutNumber("tempMlancerLeft", temp_m_lancer_left);
+    frc::SmartDashboard::PutNumber("tempMlancerRight", temp_m_lancer_right);
+    frc::SmartDashboard::PutNumber("tempMbasculLeft", temp_m_bascul_left);
+    frc::SmartDashboard::PutNumber("tempMbasculRight", temp_m_bascul_right);
+
 }
 
 
-void Top::PositionBasculTele(){
+
+void Top::PositionBascul(){
     pov = controller.GetPOV();
 
-    if (pov == 0 && bascul_value < MAX_VALUE_BASCUL){
+    if (feeder_state != Loaded && feeder_state != Fire){
+        set_predefine_loaded = true;
+    }else if (set_predefine_loaded) {
+        bascul_value = -25;
+        set_predefine_loaded = false;
+    }
+    
+    if (pov == 180 && bascul_value < MAX_VALUE_BASCUL){
         bascul_value += 0.5;
     }
-    if(pov == 180 && bascul_value > MIN_VALUE_BASCUL){
+    if(pov == 0 && bascul_value > MIN_VALUE_BASCUL){
         bascul_value -=0.5;
     }
+    basculHandler();
+}
+
+void Top::basculHandler(){
 
     bascul_value_aprox = abs(bascul_value)-abs(angle_encoder_lancer);
 
@@ -57,70 +85,224 @@ void Top::PositionBasculTele(){
         motor_bascul_right.Set(-0.2);
         
     }
-    if ( bascul_value_aprox <= 2 && bascul_value_aprox >= 0){
-            motor_bascul_left.Set(0.00001);
-            motor_bascul_right.Set(-0.00001);
+
+    bascul_target_position = false;
+
+    if (bascul_value_aprox <= 2 && bascul_value_aprox >= 0){
+        motor_bascul_left.Set(0.00001);
+        motor_bascul_right.Set(-0.00001);
+        bascul_target_position = true;
+        
     }
-    if ( bascul_value_aprox >= -2 && bascul_value_aprox < 0 ){
-            motor_bascul_left.Set(0.00001);
-            motor_bascul_right.Set(-0.00001);
+    if (bascul_value_aprox >= -2 && bascul_value_aprox < 0 ){
+        motor_bascul_left.Set(0.00001);
+        motor_bascul_right.Set(-0.00001);
+        bascul_target_position = true;
     }
 }
 
 void Top::handlelancerSpeed(){
 
-    motor_lancer_an_right.Set(-0.6);
-    motor_lancer_an_left.Set(0.6);
-}
-
-void Top::intakeAnneau(){
-
-    RT = controller.GetRightTriggerAxis();
+    if(feeder_state == Loaded || feeder_state == Fire){
+        motor_lancer_an_right.Set(-0.6);
+        motor_lancer_an_left.Set(0.6);
+    }
+    else{
+        motor_lancer_an_right.Set(0);
+        motor_lancer_an_left.Set(0);
+    }
     
-    if (RT == 1){
-        m_motor_intake.Set(-0.5);
-    }
-    if (anneau_limit_Switch.Get() && RT != 1){
-        m_motor_intake.Set(0);
-        
-    }
-    if(feeder_possition_lancer_state == 0 && anneau_limit_Switch.Get() == false && RT != 1 ){
-        m_motor_intake.Set(0.2);
-        
-    }
-}
-
-void Top::PositionFeeder(){ 
-    RB = controller.GetRightBumper();
-    LB = controller.GetLeftBumper();
-    RT = controller.GetRightTriggerAxis();
-    if(LB){ //descend
-        if(angle_encoder_feeder < ENCODER_FEEDER_TAKE_VALUE){
-             motor_feeder.Set(-MOTOR_FEEDER_SPEED);
-        }   
-    }
-    if(RB){ //monte
-        if(angle_encoder_feeder > ENCODER_FEEDER_LANCER_VALUE){
-            motor_feeder.Set(MOTOR_FEEDER_SPEED);  
-        }
-    }
-
-    if(angle_encoder_feeder < ENCODER_FEEDER_LANCER_VALUE){
-        motor_feeder.Set(0);
-        feeder_possition_lancer_state = 1;
-    }
-
-    if(angle_encoder_feeder > ENCODER_FEEDER_TAKE_VALUE){
-        motor_feeder.Set(0);
-           feeder_possition_lancer_state = 0;
-    }
 }
 
 void Top::handleTopTaskTeleop(){
+    feederHandler();
     handleEncoderValue();
+    handleMotorTemp();
     handlelancerSpeed();
-    PositionFeeder();
-    PositionBasculTele();
-    intakeAnneau();
+    PositionBascul();
+    ampHandler();
 
+}
+
+void Top::handleTopTaskAuto(){
+    handleEncoderValue();
+    lanceurAuto();
+    handlelancerSpeed();
+    feederHandler();
+    PositionBascul();    
+}
+
+void Top::lanceurAuto(){
+
+    if (feeder_state == Loaded){
+
+        motor_lancer_an_right.Set(-0.6);
+        motor_lancer_an_left.Set(0.6);
+        bascul_value = -25;
+        startTimerPropul();
+        time_t delay_propul = time(NULL) - start_propul;
+
+        if( delay_propul >= WAIT_TIME_BEFORE_SHOOTING){
+            feederFireAuto();
+            startTimerFire();
+            time_t delay_fire = time(NULL) - start_fire;
+            if (delay_fire >= WAIT_TIME_SHOOTHING){
+                Feeder::setState(FeederState::Idle);
+                bascul_value = -20;
+            }
+        } 
+    }    
+        
+
+}
+
+void Top::startTimerPropul(){
+    
+    if (!timer_started_propul){
+        time(&start_propul);
+        timer_started_propul = true;
+    }
+}
+
+void Top::startTimerFire(){
+    if (!timer_started_fire){
+        time(&start_fire);
+        timer_started_fire = true;
+    }
+}
+
+//-------------------------------------------------------------------
+
+void Top::ampHandler(){
+    switch (amp_state)
+    {
+    case Idle:
+        basculIdle();
+        break;
+    case BasculUp:
+        basculUp();
+        break;
+    case BasculGoingUp:
+        basculGoingUp();
+        break;
+    case FeederUp:
+        feederUp();
+        break;
+    case Loaded:
+        feederLoaded();
+        break;
+    case Fire:
+        feederFire();
+        break;
+    case FeederDown:
+        feederDown();
+        break;
+    case BasculDown:
+        basculDown();
+        break;
+    case BasculGoingDown:
+        basculGoingDown();
+        break;
+
+        
+    
+    default:
+        break;
+    }
+}
+
+void Top::basculUp(){
+    bascul_value = BASCUL_VALUE_AMP;
+    basculHandler();
+    setState(AmpState::BasculGoingUp);
+}
+
+void Top::basculIdle(){
+    b_button = controller.GetBButton();
+
+    if(b_button){
+        setState(AmpState::BasculUp);
+    }
+}
+
+void Top::basculGoingUp(){
+    if (bascul_target_position){
+        setState(AmpState::FeederUp);
+    }
+}
+
+void Top::feederUp(){
+    Feeder::feederEncoderReader();
+    if(angle_encoder_feeder < AMP_POSITION_FEEDER_DOWN){ 
+        if(feeder_speed != FEEDER_DOWN_SPEED){
+            feeder_speed = FEEDER_DOWN_SPEED;
+            setMotorFeeder(feeder_speed);
+
+        }
+        
+    }else{
+        feeder_speed = 0;
+        setMotorFeeder(feeder_speed);
+        setState(AmpState::Loaded);
+
+    }
+}
+
+void Top::feederLoaded(){
+    RT = controller.GetRightTriggerAxis();
+
+    if(RT != 1){
+        return;
+    }
+
+    intake_speed = INTAKE_PUSH_SPEED;
+    setMotorIntake(intake_speed);
+    setState(AmpState::Fire);
+    
+}
+
+void Top::feederFire(){
+    RT = controller.GetRightTriggerAxis();
+    
+    if(RT != 1){
+        intake_speed = 0;
+        setMotorIntake(intake_speed);
+        setState(AmpState::FeederDown);
+        
+    }
+}
+
+void Top::feederDown(){
+    Feeder::feederEncoderReader();
+    if(angle_encoder_feeder > ENCODER_FEEDER_LANCER_VALUE){ 
+        if(feeder_speed != FEEDER_UP_MAX_SPEED){
+            feeder_speed = FEEDER_UP_MAX_SPEED;
+            setMotorFeeder(feeder_speed);
+
+        }
+        
+    }else{
+        feeder_speed = 0;
+        setMotorFeeder(feeder_speed);
+        setState(AmpState::BasculDown);
+
+    }
+}
+
+void Top::basculDown(){
+    bascul_value = MAX_VALUE_BASCUL;
+    basculHandler();
+    setState(AmpState::BasculGoingDown);
+}
+
+void Top::basculGoingDown(){
+    if (bascul_target_position){
+        setState(AmpState::Idle);
+    }
+}
+
+void Top::setState(AmpState state){
+    std::cout <<"amp_state " << state << "\n";
+    frc::SmartDashboard::PutNumber("AmpState", state);
+    amp_state = state; 
 }

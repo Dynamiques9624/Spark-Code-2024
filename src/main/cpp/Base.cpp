@@ -1,60 +1,30 @@
-// base est le code maine 
 
 #include "Base.h"
 
 void Base::RobotInit() {
   handleTopInit();
+  baseInit();
 
-  m_left_follow_motor.RestoreFactoryDefaults();
-  m_left_lead_motor.RestoreFactoryDefaults();
-  m_right_follow_motor.RestoreFactoryDefaults();
-  m_right_lead_motor.RestoreFactoryDefaults(); 
-
-  m_left_follow_motor.Follow(m_left_lead_motor);
-  m_right_follow_motor.Follow(m_right_lead_motor);
-
-  m_led.SetLength(kLength);
-  m_led.SetData(m_ledBuffer);
-  m_led.Start();
-
-  max_speed_tele = 1;
 }
 
 void Base::AutonomousPeriodic(){
-
-
+  autonomous_pub.Set(1);
+  handleTopTaskAuto();
+  handleShowAutoValue();
+  handleSubscriberTask();
+  handleDriveAuto();
 
 }
 
 void Base::TeleopPeriodic() { 
-  
-  handleDriveTeleop();
+  autonomous_pub.Set(0);
+  handleTaskBaseTeleop();
   handleTopTaskTeleop();
 
-  Color();
-  m_led.SetData(m_ledBuffer);
 }
 
+//Base code------------------------------------------------------------------------------------------------------------
 
-//fonction pour la base
-
-void Base::Color() {
-
-  for (int i = 0; i < kLength; i++) {
-    if (x > 0.1){
-      //color backward
-      m_ledBuffer[i].SetHSV(242, 51, 51);
-    } 
-    if (x < -0.1){
-      //color forward
-      m_ledBuffer[i].SetHSV(24, 35, 245);
-    }
-    else{
-      m_ledBuffer[i].SetHSV(28, 255, 255);
-    }    
-  }
-
-}
 
 void Base::handleDriveTeleop(){
 
@@ -68,7 +38,6 @@ void Base::handleDriveTeleop(){
   if(pov == 270 && max_speed_tele > 0.1){
     max_speed_tele -=0.01;
   }
-  //std::cout<<"anglevalue" <<max_speed_tele <<"\n";
 
   if (x > max_speed_tele){
       x = max_speed_tele;
@@ -86,3 +55,67 @@ void Base::handleDriveTeleop(){
   m_robotDrive.ArcadeDrive(x,y);
 
 }
+
+void Base::handleMotorBaseTemp(){
+  motor_left_ID10 = left_lead_motor.GetMotorTemperature();
+  motor_left_ID18 = left_follow_motor.GetMotorTemperature();
+  motor_right_ID1 = right_lead_motor.GetMotorTemperature();
+  motor_right_ID6 = right_follow_motor.GetMotorTemperature();
+
+  frc::SmartDashboard::PutNumber("mLeftID10", motor_left_ID10);
+  frc::SmartDashboard::PutNumber("mLeftID18", motor_left_ID18);
+  frc::SmartDashboard::PutNumber("mRightID1", motor_right_ID1);
+  frc::SmartDashboard::PutNumber("mRightID6", motor_right_ID6);
+}
+
+void Base::handleTaskBaseTeleop(){
+  handleDriveTeleop();
+  handleMotorBaseTemp();
+}
+
+
+void Base::baseInit(){
+  camera1 = frc::CameraServer::StartAutomaticCapture(0);
+
+  left_follow_motor.RestoreFactoryDefaults();
+  left_lead_motor.RestoreFactoryDefaults();
+  right_follow_motor.RestoreFactoryDefaults();
+  right_lead_motor.RestoreFactoryDefaults(); 
+
+  left_follow_motor.Follow(left_lead_motor);
+  right_follow_motor.Follow(right_lead_motor);
+  
+  max_speed_tele = 1;
+
+}
+
+void Base::handleDriveAuto(){
+
+  left_speed_auto = left_wheel_speed_percent/100;
+  right_speed_auto = right_wheel_speed_percent/100;
+  
+  if(left_speed_auto > DRIVE_MAX_SPEED_AUTO){
+    left_speed_auto = DRIVE_MAX_SPEED_AUTO;
+  }
+  if(right_speed_auto > DRIVE_MAX_SPEED_AUTO){
+    right_speed_auto = DRIVE_MAX_SPEED_AUTO;
+  }
+  if(left_speed_auto < -DRIVE_MAX_SPEED_AUTO){
+    left_speed_auto = -DRIVE_MAX_SPEED_AUTO;
+  }
+  if(right_speed_auto < -DRIVE_MAX_SPEED_AUTO){
+    right_speed_auto = -DRIVE_MAX_SPEED_AUTO;
+  }
+  
+  left_lead_motor.Set(left_speed_auto);
+  right_lead_motor.Set(right_speed_auto);
+
+}
+
+void Base::handleShowAutoValue(){
+
+  frc::SmartDashboard::PutNumber("ringDetected", ring_detected);
+  frc::SmartDashboard::PutNumber("tagDetected", tag_detected);
+  frc::SmartDashboard::PutNumber("tagID", tag_id);
+}
+

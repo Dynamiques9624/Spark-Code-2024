@@ -1,59 +1,96 @@
 #pragma once
 
 #include"Config.h"
+#include "Feeder.h"
 
 #include <frc/XboxController.h>
 #include <frc/DutyCycleEncoder.h>
 #include <frc/TimedRobot.h>
 #include <frc/smartdashboard/SmartDashboard.h>
-#include <frc/DigitalInput.h>
 
 #include <rev/CANSparkMax.h>
 
 #include <cmath> 
+#include <time.h>
 #include <iostream>
-using namespace std;
+//using namespace std;
 
-class Top {
+class Top : protected Feeder{
  public:
 
  protected:
+  enum AmpState{
+    Idle, BasculUp, BasculGoingUp, FeederUp, Loaded, Fire, FeederDown, BasculDown, BasculGoingDown
+  };
+  AmpState amp_state;
+
+  void setState(AmpState state);
 
   void handleTopInit();
   void handleEncoderValue();
-  void PositionFeeder();
-  void PositionBasculTele();
+  void handleMotorTemp();
+  
+  void ampHandler();
+  void PositionBascul();
+  void basculHandler();
   void handleTopTaskTeleop();
+  void handleTopTaskAuto();
   void handlelancerSpeed();
-  void intakeAnneau();
+  void lanceurAuto();
+  
+
+  double bascul_value;
 
  private:
-    frc::XboxController controller{CONTROLLER_PORT_NO};
-    
-    frc::DutyCycleEncoder m_dutyCycleEncoder_feeder{ENCODER_FEEDER};
-    frc::DutyCycleEncoder m_dutyCycleEncoder_lancer{ENCODER_BASCUL};
+    bool bascul_target_position;
 
-    bool connect_encoder_feeder;
     bool connect_encoder_lancer;
-    double angle_encoder_feeder;
+
+    double feeder_speed;
+    double intake_speed;
+    
     double angle_encoder_lancer;
     bool RB;
     bool LB;
     double RT;
     int pov;
-    double bascul_value;
-    double bascul_value_aprox;
-    int feeder_possition_lancer_state;
+    bool b_button;
     
+    double bascul_value_aprox;
 
-    frc::DigitalInput anneau_limit_Switch{LIMIT_SWITCH};
+    bool set_predefine_loaded;
+    
+    double temp_m_lancer_left;
+    double temp_m_lancer_right;
+    double temp_m_bascul_left;
+    double temp_m_bascul_right;
 
-    rev::CANSparkMax motor_feeder{MOTOR_FEEDER, rev::CANSparkMax::MotorType::kBrushless};
+    bool timer_started_propul;
+    time_t start_propul;
+
+    bool timer_started_fire;
+    time_t start_fire;
+    
+    frc::XboxController controller{CONTROLLER_PORT_NO};
+        
+    frc::DutyCycleEncoder m_dutyCycleEncoder_lancer{ENCODER_BASCUL};
+
     rev::CANSparkMax motor_lancer_an_left{MOTOR_LANCER_AN_LEFT, rev::CANSparkMax::MotorType::kBrushless};
     rev::CANSparkMax motor_lancer_an_right{MOTOR_LANCER_AN_RIGHT, rev::CANSparkMax::MotorType::kBrushless};
     
     rev::CANSparkMax motor_bascul_left{MOTOR_BASCUL_LEFT, rev::CANSparkMax::MotorType::kBrushless}; 
     rev::CANSparkMax motor_bascul_right{MOTOR_BASCUL_RIGHT, rev::CANSparkMax::MotorType::kBrushless};
 
-    rev::CANSparkMax m_motor_intake{MOTOR_FEEDER_INTAKE, rev::CANSparkMax::MotorType::kBrushless};
+    void startTimerPropul();
+    void startTimerFire();
+
+    void basculUp();
+    void basculIdle();
+    void basculGoingUp();
+    void feederUp();
+    void feederLoaded();
+    void feederFire();
+    void feederDown();
+    void basculDown();
+    void basculGoingDown();
 };  
