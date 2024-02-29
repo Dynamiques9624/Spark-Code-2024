@@ -42,9 +42,14 @@ class Top : protected Feeder{
   double bascul_value;
 
  private:
+
     bool bascul_target_position;
 
     bool connect_encoder_lancer;
+
+    bool y_button_handler;
+
+    double y_button;
 
     double feeder_speed;
     double intake_speed;
@@ -53,8 +58,9 @@ class Top : protected Feeder{
     bool RB;
     bool LB;
     double RT;
+    double LT;
     int pov;
-    bool b_button;
+    
     
     double bascul_value_aprox;
 
@@ -83,6 +89,8 @@ class Top : protected Feeder{
 
     void startTimerPropul();
     void startTimerFire();
+
+    void yButtonHandler();
 
     void basculUp();
     void basculIdle();

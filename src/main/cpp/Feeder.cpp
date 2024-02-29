@@ -59,6 +59,7 @@ void Feeder::feederHandler(){
         feederPosAmp();
         break;
     }
+    
     colorHandler();
     m_led.SetData(m_ledBuffer);
 

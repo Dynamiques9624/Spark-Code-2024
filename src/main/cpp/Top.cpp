@@ -18,6 +18,8 @@ void Top:: handleTopInit(){
     timer_started_fire = false;
     
     bascul_target_position = false;
+
+    y_button_handler = false;
   
 }
 
@@ -48,6 +50,7 @@ void Top::handleMotorTemp(){
 
 void Top::PositionBascul(){
     pov = controller.GetPOV();
+    LT = controller.GetLeftTriggerAxis();
 
     if (feeder_state != Loaded && feeder_state != Fire){
         set_predefine_loaded = true;
@@ -56,7 +59,7 @@ void Top::PositionBascul(){
         set_predefine_loaded = false;
     }
     
-    if (pov == 180 && bascul_value < MAX_VALUE_BASCUL){
+    if (LT == 1 && bascul_value < MAX_VALUE_BASCUL){
         bascul_value += 0.5;
     }
     if(pov == 0 && bascul_value > MIN_VALUE_BASCUL){
@@ -102,16 +105,30 @@ void Top::basculHandler(){
 }
 
 void Top::handlelancerSpeed(){
+    yButtonHandler();
+    
 
     if(feeder_state == Loaded || feeder_state == Fire){
-        motor_lancer_an_right.Set(-0.6);
-        motor_lancer_an_left.Set(0.6);
+        if (y_button_handler){
+            motor_lancer_an_right.Set(-0.8);
+            motor_lancer_an_left.Set(0.8);
+        }
     }
     else{
         motor_lancer_an_right.Set(0);
         motor_lancer_an_left.Set(0);
     }
-    
+ 
+}
+
+void Top::yButtonHandler(){
+    y_button = controller.GetYButton();
+
+    if (y_button && !y_button_handler){
+        y_button_handler = true;
+    }else if (y_button_handler){
+        y_button_handler = false;
+    }
 }
 
 void Top::handleTopTaskTeleop(){
@@ -215,13 +232,15 @@ void Top::basculUp(){
     bascul_value = BASCUL_VALUE_AMP;
     basculHandler();
     setState(AmpState::BasculGoingUp);
+
 }
 
 void Top::basculIdle(){
-    b_button = controller.GetBButton();
+    LB = controller.GetLeftBumper();
 
-    if(b_button){
+    if(LB){
         setState(AmpState::BasculUp);
+
     }
 }
 
@@ -298,6 +317,7 @@ void Top::basculDown(){
 void Top::basculGoingDown(){
     if (bascul_target_position){
         setState(AmpState::Idle);
+    
     }
 }
 

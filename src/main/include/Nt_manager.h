@@ -46,5 +46,4 @@ class NT_Manager{
    nt::DoubleSubscriber dist_front_sub;
    nt::DoubleSubscriber dist_rear_sub;
     
-
 };

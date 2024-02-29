@@ -35,6 +35,7 @@
 #define MOTOR_BASCUL_LEFT 19
 #define MOTOR_BASCUL_RIGHT 20
 
+//position of the bascul when whant to scorre in the amp
 #define BASCUL_VALUE_AMP -90
 
 //PROPULSUER---------------------------------------------------------
@@ -67,7 +68,7 @@
 #define ENCODER_FEEDER_VERTICAL_ANGLE 90
 
 //Speed 0 a 1 pour motor_feeder
-#define FEEDER_DOWN_SPEED -0.2
+#define FEEDER_DOWN_SPEED -0.6
 
 //Speed 0 a 1 pour aspirer anneau
 #define INTAKE_SPEED_SUCK 0.2
@@ -78,6 +79,7 @@
 //Speed 0 a 1 pour motor_feeder
 #define FEEDER_UP_MAX_SPEED 0.4
 
+//speed of feeder when going in amp position
 #define FEEDER_DOWN_AMP_MAX_SPEED -0.2
 
 //increment pour la vitesse de la remonter du feeder
@@ -94,4 +96,5 @@
 //Can id motteur roue feeder intake
 #define MOTOR_FEEDER_INTAKE 4
 
+//Position of the feeder when drop ring in amp
 #define AMP_POSITION_FEEDER_DOWN 233
