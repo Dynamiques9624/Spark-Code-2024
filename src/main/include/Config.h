@@ -68,10 +68,10 @@
 #define ENCODER_FEEDER_VERTICAL_ANGLE 90
 
 //Speed 0 a 1 pour motor_feeder
-#define FEEDER_DOWN_SPEED -0.6
+#define FEEDER_DOWN_SPEED -0.4
 
 //Speed 0 a 1 pour aspirer anneau
-#define INTAKE_SPEED_SUCK 0.2
+#define INTAKE_SPEED_SUCK 0.4
 
 //speed of the intake to push the ring
 #define INTAKE_PUSH_SPEED -0.5

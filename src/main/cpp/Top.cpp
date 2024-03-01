@@ -238,7 +238,7 @@ void Top::basculUp(){
 void Top::basculIdle(){
     LB = controller.GetLeftBumper();
 
-    if(LB){
+    if(LB && feeder_state == Loaded){
         setState(AmpState::BasculUp);
 
     }
