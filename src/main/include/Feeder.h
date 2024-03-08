@@ -1,8 +1,8 @@
 #pragma once
 
-#include"Config.h"
 #include "Nt_manager.h"
-
+#include "Config.h"
+#include <FileLogger.h>
 #include <array>
 
 #include <frc/XboxController.h>
@@ -18,21 +18,21 @@
 #include <iostream>
 using namespace std;
 
-class Feeder : public NT_Manager {
+class Feeder{
  public:
-    
  protected:
     enum FeederState{
         Idle, GoDown , Suck, GoUp, Loaded, Fire, PosAmp, GoAmp
     };
     FeederState feeder_state;
 
+    NT_Manager m_nt;
+
     double angle_encoder_feeder;
 
     void feederInit();
     void feederHandler();
     void colorHandler();
-    void feederFireAuto();
     void setState(FeederState state);
     void feederEncoderReader();
     void setMotorFeeder(double feeder_speed);
@@ -40,6 +40,11 @@ class Feeder : public NT_Manager {
     
  private:
     bool connect_encoder_feeder;
+
+    bool shake_ring;
+    bool shake_ring_enable;
+    bool shake_ring_out;
+    std::clock_t shake_ring_start;
     
  
     bool RB;
@@ -55,7 +60,9 @@ class Feeder : public NT_Manager {
     double temp_m_feeder;
     double temp_m_intake;
 
-    frc::XboxController controller{CONTROLLER_PORT_NO};
+    tools::FileLogger     logger{"Feeder"};
+
+    frc::XboxController m_controller{CONTROLLER_PORT_NO};
     
     frc::DutyCycleEncoder m_dutyCycleEncoder_feeder{ENCODER_FEEDER};
 
@@ -78,5 +85,8 @@ class Feeder : public NT_Manager {
     void feederEject();
     void feederPosAmp();
     void motorTemp();
-    
+    void startShakeRing();
+    void stopShakeRing();
+    void shakeRing();
+    double diffclock(std::clock_t clock1, std::clock_t clock2);
 };  

@@ -1,4 +1,5 @@
 #include "Nt_manager.h"
+#include "Config.h"
 
 
 
@@ -14,9 +15,13 @@ void NT_Manager::ntManagerInit(){
     tag_id_sub = table->GetDoubleTopic("tag_id").Subscribe(0.0);
     dist_front_sub = table->GetDoubleTopic("dist_front").Subscribe(0.0);
     dist_rear_sub = table->GetDoubleTopic("dist_rear").Subscribe(0.0);
+    feeder_down_sub = table->GetDoubleTopic("feeder_down").Subscribe(0.0);
 
     auto autonumous = table->GetDoubleTopic("autonomous");
     autonomous_pub = autonumous.Publish();
+    
+    auto switch_intake = table->GetDoubleTopic("limit_switch");
+    limit_switch_pub = switch_intake.Publish();
 
 }
 
@@ -27,6 +32,9 @@ void NT_Manager::handleSubscriberTask(){
 
     this->right_wheel_speed_percent = right_wheel_speed_percent_sub.Get();
     //std::cout <<"rightSpeedAuto " << right_wheel_speed_percent << "\n";
+
+    this->feeder_want_down = feeder_down_sub.Get();
+    //std::cout <<"feederWantDown " << feeder_want_down << "\n";
 
     this->pos_value_auto = pos_value_sub.Get();
     //std::cout <<"posValueAuto " << pos_value_auto << "\n";
@@ -46,8 +54,8 @@ void NT_Manager::handleSubscriberTask(){
     //std::cout <<"tagId " << tag_id << "\n";
 
     this->dist_rear = dist_rear_sub.Get();
-    std::cout <<"distRear " << dist_rear << "\n";
+    //std::cout <<"distRear " << dist_rear << "\n";
 
     this->dist_front = dist_front_sub.Get();
-    std::cout <<"distFront " << dist_front << "\n";
+    //std::cout <<"distFront " << dist_front << "\n";
 }

@@ -14,11 +14,8 @@ void Top:: handleTopInit(){
     bascul_value = -20;
     set_predefine_loaded = false;
 
-    timer_started_propul = false;
-    timer_started_fire = false;
-    
     bascul_target_position = false;
-
+    
     y_button_handler = false;
   
 }
@@ -49,10 +46,10 @@ void Top::handleMotorTemp(){
 
 
 void Top::PositionBascul(){
-    pov = controller.GetPOV();
-    LT = controller.GetLeftTriggerAxis();
+    pov = m_controller.GetPOV();
+    LT = m_controller.GetLeftTriggerAxis();
 
-    if (feeder_state != Loaded && feeder_state != Fire){
+    if (feeder_state != FeederState::Loaded && feeder_state != FeederState::Fire){
         set_predefine_loaded = true;
     }else if (set_predefine_loaded) {
         bascul_value = -25;
@@ -108,7 +105,7 @@ void Top::handlelancerSpeed(){
     yButtonHandler();
     
 
-    if(feeder_state == Loaded || feeder_state == Fire){
+    if(feeder_state == FeederState::GoUp || feeder_state == FeederState::Loaded || feeder_state == FeederState::Fire){
         if (y_button_handler){
             motor_lancer_an_right.Set(-0.8);
             motor_lancer_an_left.Set(0.8);
@@ -122,7 +119,7 @@ void Top::handlelancerSpeed(){
 }
 
 void Top::yButtonHandler(){
-    y_button = controller.GetYButton();
+    y_button = m_controller.GetYButton();
 
     if (y_button && !y_button_handler){
         y_button_handler = true;
@@ -143,50 +140,11 @@ void Top::handleTopTaskTeleop(){
 
 void Top::handleTopTaskAuto(){
     handleEncoderValue();
-    lanceurAuto();
     handlelancerSpeed();
     feederHandler();
     PositionBascul();    
 }
 
-void Top::lanceurAuto(){
-
-    if (feeder_state == Loaded){
-
-        motor_lancer_an_right.Set(-0.6);
-        motor_lancer_an_left.Set(0.6);
-        bascul_value = -25;
-        startTimerPropul();
-        time_t delay_propul = time(NULL) - start_propul;
-
-        if( delay_propul >= WAIT_TIME_BEFORE_SHOOTING){
-            feederFireAuto();
-            startTimerFire();
-            time_t delay_fire = time(NULL) - start_fire;
-            if (delay_fire >= WAIT_TIME_SHOOTHING){
-                Feeder::setState(FeederState::Idle);
-                bascul_value = -20;
-            }
-        } 
-    }    
-        
-
-}
-
-void Top::startTimerPropul(){
-    
-    if (!timer_started_propul){
-        time(&start_propul);
-        timer_started_propul = true;
-    }
-}
-
-void Top::startTimerFire(){
-    if (!timer_started_fire){
-        time(&start_fire);
-        timer_started_fire = true;
-    }
-}
 
 //-------------------------------------------------------------------
 
@@ -236,21 +194,24 @@ void Top::basculUp(){
 }
 
 void Top::basculIdle(){
-    LB = controller.GetLeftBumper();
+    LB = m_controller.GetLeftBumper();
 
-    if(LB && feeder_state == Loaded){
+    if(LB && feeder_state == FeederState::Loaded){
         setState(AmpState::BasculUp);
 
     }
 }
 
 void Top::basculGoingUp(){
+    if (angle_encoder_lancer <= BASCUL_VALUE_DEPLOY_FEEDER_AMP){
+        feederUp(false);
+    }
     if (bascul_target_position){
         setState(AmpState::FeederUp);
     }
 }
 
-void Top::feederUp(){
+void Top::feederUp(bool update_state){
     Feeder::feederEncoderReader();
     if(angle_encoder_feeder < AMP_POSITION_FEEDER_DOWN){ 
         if(feeder_speed != FEEDER_DOWN_SPEED){
@@ -262,13 +223,16 @@ void Top::feederUp(){
     }else{
         feeder_speed = 0;
         setMotorFeeder(feeder_speed);
-        setState(AmpState::Loaded);
+        if (update_state){
+          setState(AmpState::Loaded);  
+        }
+        
 
     }
 }
 
 void Top::feederLoaded(){
-    RT = controller.GetRightTriggerAxis();
+    RT = m_controller.GetRightTriggerAxis();
 
     if(RT != 1){
         return;
@@ -281,7 +245,7 @@ void Top::feederLoaded(){
 }
 
 void Top::feederFire(){
-    RT = controller.GetRightTriggerAxis();
+    RT = m_controller.GetRightTriggerAxis();
     
     if(RT != 1){
         intake_speed = 0;
@@ -293,9 +257,12 @@ void Top::feederFire(){
 
 void Top::feederDown(){
     Feeder::feederEncoderReader();
+    if (angle_encoder_feeder <= FEEDER_VALUE_DEPLOY_BASCUL_AMP){
+        basculDown(false);
+    }
     if(angle_encoder_feeder > ENCODER_FEEDER_LANCER_VALUE){ 
-        if(feeder_speed != FEEDER_UP_MAX_SPEED){
-            feeder_speed = FEEDER_UP_MAX_SPEED;
+        if(feeder_speed != FEEDER_UP_SPEED_AMP){
+            feeder_speed = FEEDER_UP_SPEED_AMP;
             setMotorFeeder(feeder_speed);
 
         }
@@ -308,10 +275,13 @@ void Top::feederDown(){
     }
 }
 
-void Top::basculDown(){
+void Top::basculDown(bool update_state){
     bascul_value = MAX_VALUE_BASCUL;
     basculHandler();
-    setState(AmpState::BasculGoingDown);
+    if (update_state){
+      setState(AmpState::BasculGoingDown);  
+    }
+    
 }
 
 void Top::basculGoingDown(){
@@ -322,7 +292,7 @@ void Top::basculGoingDown(){
 }
 
 void Top::setState(AmpState state){
-    std::cout <<"amp_state " << state << "\n";
+    //std::cout <<"amp_state " << state << "\n";
     frc::SmartDashboard::PutNumber("AmpState", state);
     amp_state = state; 
 }

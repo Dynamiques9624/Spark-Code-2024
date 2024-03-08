@@ -1,5 +1,5 @@
 
-// possition du controller sur driver station
+// possition du m_controller sur driver station
 #define CONTROLLER_PORT_NO 0
 //PWM pin led strip
 #define LED_STRIP_PWM 2
@@ -21,6 +21,12 @@
 //max speed during autonumus 0 to 1
 #define DRIVE_MAX_SPEED_AUTO 1
 
+//value for the sensibility of turning
+//value increment and limitation
+#define IX 0.6
+//multiplicateur 
+#define FX 1
+
 //BASCUL--------------------------------------------------------
 
 //digital pin des deux encoder
@@ -36,7 +42,10 @@
 #define MOTOR_BASCUL_RIGHT 20
 
 //position of the bascul when whant to scorre in the amp
-#define BASCUL_VALUE_AMP -90
+#define BASCUL_VALUE_AMP -90 
+
+//position of the bascul when want the feeder to go in amp position
+#define BASCUL_VALUE_DEPLOY_FEEDER_AMP -35
 
 //PROPULSUER---------------------------------------------------------
 
@@ -45,7 +54,7 @@
 #define MOTOR_LANCER_AN_LEFT 2
 
 //Time before shooting in autonumus mode in seconds
-#define WAIT_TIME_BEFORE_SHOOTING 2
+#define WAIT_TIME_BEFORE_SHOOTING 3
 
 //Time for shooting in autonumus mode in seconds
 #define WAIT_TIME_SHOOTHING 2
@@ -62,13 +71,10 @@
 //prendre anneau
 #define ENCODER_FEEDER_TAKE_VALUE 180 //189 valeur peut etre
 //drop anneau dans lancer
-#define ENCODER_FEEDER_LANCER_VALUE -5 //val -5 depart
+#define ENCODER_FEEDER_LANCER_VALUE -3 //-4 val depart avant changement -5
 
 //angle when the feader is vertical
 #define ENCODER_FEEDER_VERTICAL_ANGLE 90
-
-//Speed 0 a 1 pour motor_feeder
-#define FEEDER_DOWN_SPEED -0.4
 
 //Speed 0 a 1 pour aspirer anneau
 #define INTAKE_SPEED_SUCK 0.4
@@ -77,15 +83,20 @@
 #define INTAKE_PUSH_SPEED -0.5
 
 //Speed 0 a 1 pour motor_feeder
-#define FEEDER_UP_MAX_SPEED 0.4
+#define FEEDER_DOWN_SPEED -0.54 ///////-0.4
 
-//speed of feeder when going in amp position
-#define FEEDER_DOWN_AMP_MAX_SPEED -0.2
+//Speed 0 a 1 pour motor_feeder
+#define FEEDER_UP_MAX_SPEED 0.54 ///////0.4
+
+#define FEEDER_UP_SPEED_AMP 0.50
 
 //increment pour la vitesse de la remonter du feeder
-#define FEEDER_SPEED_UP_INC 0.2
+#define FEEDER_SPEED_UP_INC 0.27 ////// 0.2
 
-#define FEEDER_SPEED_AMP_INC 0.1
+//speed of feeder when going in amp position
+#define FEEDER_DOWN_AMP_MAX_SPEED -0.27 ///// -0.27
+
+#define FEEDER_SPEED_AMP_INC 0.135 //////0.1
 
 //value for the division for the speed of the feeder
 #define ENCODER_FEEDER_SPEED_DIV ((ENCODER_FEEDER_TAKE_VALUE-ENCODER_FEEDER_VERTICAL_ANGLE)/5)
@@ -98,3 +109,23 @@
 
 //Position of the feeder when drop ring in amp
 #define AMP_POSITION_FEEDER_DOWN 233
+
+//value for when the bascul go back to normal position after amp
+#define FEEDER_VALUE_DEPLOY_BASCUL_AMP 187
+
+//value for shake of the ring
+#define ENCODER_FEEDER_STOP_SHAKE_VALUE (ENCODER_FEEDER_LANCER_VALUE + 70)
+#define SHAKE_RING_OUT_TIME 30
+#define SHAKE_RING_INTAKE 0.1
+
+
+//configue pour pathplanner
+#define WHEEL_DISTANCE 0.559_m
+#define MOTOR_MAX_RPM 3000 // 5310
+#define MOTOR_GR 10.71
+#define WHEEL_DIAM_IN 6.0
+#define WHEEL_CIRC_IN 18.85
+
+#define DEBUG
+
+//#define PATHPLANNER

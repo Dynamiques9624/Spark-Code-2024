@@ -61,7 +61,6 @@ class Top : protected Feeder{
     double LT;
     int pov;
     
-    
     double bascul_value_aprox;
 
     bool set_predefine_loaded;
@@ -71,13 +70,7 @@ class Top : protected Feeder{
     double temp_m_bascul_left;
     double temp_m_bascul_right;
 
-    bool timer_started_propul;
-    time_t start_propul;
-
-    bool timer_started_fire;
-    time_t start_fire;
-    
-    frc::XboxController controller{CONTROLLER_PORT_NO};
+    frc::XboxController m_controller{CONTROLLER_PORT_NO};
         
     frc::DutyCycleEncoder m_dutyCycleEncoder_lancer{ENCODER_BASCUL};
 
@@ -87,18 +80,16 @@ class Top : protected Feeder{
     rev::CANSparkMax motor_bascul_left{MOTOR_BASCUL_LEFT, rev::CANSparkMax::MotorType::kBrushless}; 
     rev::CANSparkMax motor_bascul_right{MOTOR_BASCUL_RIGHT, rev::CANSparkMax::MotorType::kBrushless};
 
-    void startTimerPropul();
-    void startTimerFire();
 
     void yButtonHandler();
 
     void basculUp();
     void basculIdle();
     void basculGoingUp();
-    void feederUp();
+    void feederUp(bool update_state = true);
     void feederLoaded();
     void feederFire();
     void feederDown();
-    void basculDown();
+    void basculDown(bool update_state = true);
     void basculGoingDown();
 };  
