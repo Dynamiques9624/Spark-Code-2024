@@ -20,10 +20,13 @@ using namespace std;
 
 class Feeder{
  public:
- protected:
     enum FeederState{
         Idle, GoDown , Suck, GoUp, Loaded, Fire, PosAmp, GoAmp
     };
+
+    Feeder::FeederState getFeederState() const {return feeder_state;}
+ protected:
+    
     FeederState feeder_state;
 
     NT_Manager m_nt;

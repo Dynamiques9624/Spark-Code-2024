@@ -42,6 +42,7 @@ void NT_Manager::handleSubscriberTask(){
     this->pos_color = pos_color_sub.Get();
     //std::cout <<"posColorAuto " << pos_color << "\n";
 
+
     //-1 = pas de ring 1 = ring
     this->ring_detected = ring_detected_sub.Get();
     //std::cout <<"ringDetectionValue " << pos_color << "\n";

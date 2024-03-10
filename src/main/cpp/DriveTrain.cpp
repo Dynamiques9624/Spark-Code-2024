@@ -11,9 +11,11 @@ using namespace tools;
 
 // ----------------------------------------------------------------------------
 //
-bool DriveTrain::init(NT_Manager *nt)
+bool DriveTrain::init(NT_Manager *nt, Feeder *feeder)
 {
   m_nt = nt;
+  m_feeder = feeder;
+  assistance_drive = false;
 
 #ifdef PATHPLANNER
   try
@@ -58,7 +60,23 @@ void DriveTrain::handleTaskDriveTrainAuto()
 //
 void DriveTrain::handleTaskDriveTrainTeleop()
 {
-  handleTaskBaseTeleop();
+  if (!assistance_drive){
+    handleTaskBaseTeleop();
+    buttonAssistanceDrive();
+    //logger.log(LL_INFO, "manuel");
+  }else if (m_feeder->getFeederState() == Feeder::FeederState::Suck){
+    assistanceDrive();
+    buttonAssistanceDriveStop();
+    #ifdef DEBUG_DRIVE_TRAIN
+      logger.log(LL_INFO, "assist");
+    #endif
+  }else{
+    assistance_drive = false;  
+    #ifdef DEBUG_DRIVE_TRAIN  
+      logger.log(LL_INFO, "assist off");  
+    #endif
+  }
+  
 }
 
 // ----------------------------------------------------------------------------
@@ -70,6 +88,39 @@ void DriveTrain::handleTaskDriveTrainInit()
 
 // ----------------------------------------------------------------------------
 //
+
+void DriveTrain::assistanceDrive(){
+  if (assistance_drive){
+    handleDriveAuto();
+  }
+}
+// ----------------------------------------------------------------------------
+//
+
+void DriveTrain::buttonAssistanceDrive(){
+  a_second_controller = m_second_controller.GetAButton();
+  if (a_second_controller && !assistance_drive){
+    assistance_drive = true;
+    #ifdef DEBUG_DRIVE_TRAIN
+      logger.log(LL_INFO, "assist on");
+    #endif
+  }
+}
+// ----------------------------------------------------------------------------
+//
+
+void DriveTrain::buttonAssistanceDriveStop(){
+  b_second_controller = m_second_controller.GetBButton();
+  if (b_second_controller && assistance_drive){
+    assistance_drive = false;
+    #ifdef DEBUG_DRIVE_TRAIN
+      logger.log(LL_INFO, "button stop assit");
+    #endif
+  }
+}
+// ----------------------------------------------------------------------------
+//
+
 void DriveTrain::handleDriveTeleop()
 {
   maxSpeedTele();
@@ -151,6 +202,7 @@ void DriveTrain::handleMotorBaseTemp()
   frc::SmartDashboard::PutNumber("mLeftID18", motor_left_ID18);
   frc::SmartDashboard::PutNumber("mRightID1", motor_right_ID1);
   frc::SmartDashboard::PutNumber("mRightID6", motor_right_ID6);
+
 }
 
 // ----------------------------------------------------------------------------

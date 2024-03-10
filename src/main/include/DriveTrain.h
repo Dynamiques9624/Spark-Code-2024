@@ -3,6 +3,7 @@
 #include "Config.h"
 #include "Nt_manager.h"
 #include <FileLogger.h>
+#include "Feeder.h"
 
 #include <frc/XboxController.h>
 #include <frc/kinematics/DifferentialDriveKinematics.h>
@@ -23,20 +24,27 @@ class DriveTrain : public frc2::Subsystem
 {
 
 public:
-  bool init(NT_Manager *nt);
+  bool init(NT_Manager *nt, Feeder *feeder);
   void handleTaskDriveTrainAuto();
   void handleTaskDriveTrainTeleop();
   void handleTaskDriveTrainInit();
 
 protected:
+  //loger avec nom de la classe
   tools::FileLogger logger{"DriveTrain"};
 
+
 private:
+  
+  bool assistance_drive;
+
   double x;
   double x_final;
   double y;
   double max_speed_tele;
   int pov;
+  bool a_second_controller;
+  bool b_second_controller;
 
   frc::Pose2d m_pose2d;
   frc::ChassisSpeeds m_speed;
@@ -50,10 +58,12 @@ private:
   double right_speed_auto;
 
   NT_Manager *m_nt;
+  Feeder *m_feeder;
 
   cs::UsbCamera camera1;
 
   frc::XboxController m_controller{CONTROLLER_PORT_NO};
+  frc::XboxController m_second_controller{SECOND_CONTROLLER_PORT_NO};
 
   rev::CANSparkMax m_left_lead_motor{LEFT_LEAD_MOTOR_ID, rev::CANSparkMax::MotorType::kBrushless};
   rev::CANSparkMax m_left_follow_motor{LEFT_FOLLOW_MOTOR_ID, rev::CANSparkMax::MotorType::kBrushless};
@@ -69,6 +79,10 @@ private:
 
   void maxSpeedTele();
   void handleSensitivityStickLeftX();
+
+  void assistanceDrive();
+  void buttonAssistanceDrive();
+  void buttonAssistanceDriveStop();
 
   void handleDriveTeleop();
   void handleMotorBaseTemp();

@@ -7,7 +7,7 @@
 void Base::RobotInit()
 {
   m_autonomous = false;
-  m_driveTrain.init(&m_nt);
+  m_driveTrain.init(&m_nt, this);
   handleTopInit();
   m_driveTrain.handleTaskDriveTrainInit();
   m_nt.ntManagerInit();
@@ -90,6 +90,7 @@ void Base::TeleopPeriodic()
     logger.log(LL_NOTICE, "exit autonomous");
   }
   m_nt.autonomous_pub.Set(0);
+  m_nt.handleSubscriberTask();
   m_driveTrain.handleTaskDriveTrainTeleop();
   handleTopTaskTeleop();
 }

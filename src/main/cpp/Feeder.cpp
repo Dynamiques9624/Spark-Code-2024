@@ -20,10 +20,16 @@ void Feeder::feederInit()
     m_led.Start();
 }
 
+// ----------------------------------------------------------------------------
+//
+
 void Feeder::feederEncoderReader()
 {
     angle_encoder_feeder = m_dutyCycleEncoder_feeder.GetDistance();
 }
+
+// ----------------------------------------------------------------------------
+//
 
 void Feeder::feederHandler()
 {
@@ -67,12 +73,18 @@ void Feeder::feederHandler()
     m_led.SetData(m_ledBuffer);
 }
 
+// ----------------------------------------------------------------------------
+//
+
 void Feeder::setState(FeederState state)
 {
     // std::cout <<"state " << state << "\n";
     frc::SmartDashboard::PutBoolean("feederstate", state);
     feeder_state = state;
 }
+
+// ----------------------------------------------------------------------------
+//
 
 void Feeder::feederIdle()
 {
@@ -98,20 +110,38 @@ void Feeder::feederIdle()
     }
 }
 
+// ----------------------------------------------------------------------------
+//
+
 void Feeder::feederReset()
 {
+    #ifdef DEBUG_FEEDER
+        logger.log(LL_NOTICE, "feeder reset");
+    #endif
     reset = true;
     setState(GoUp);
 }
 
+// ----------------------------------------------------------------------------
+//
+
 void Feeder::feederEject()
 {
+    #ifdef DEBUG_FEEDER
+        logger.log(LL_NOTICE, "feeder edject");
+    #endif
     intake_speed = INTAKE_PUSH_SPEED;
     motor_intake.Set(intake_speed);
 }
 
+// ----------------------------------------------------------------------------
+//
+
 void Feeder::feederGoDown()
 {
+    #ifdef DEBUG_FEEDER
+        logger.log(LL_NOTICE, "feeder goDown");
+    #endif
 
     if (angle_encoder_feeder < ENCODER_FEEDER_TAKE_VALUE)
     {
@@ -130,8 +160,15 @@ void Feeder::feederGoDown()
     }
 }
 
+// ----------------------------------------------------------------------------
+//
+
 void Feeder::feederSuck()
 {
+    #ifdef DEBUG_FEEDER
+        logger.log(LL_NOTICE, "feeder suck");
+    #endif
+
     eject_button_a = m_controller.GetAButton();
 
     if (eject_button_a)
@@ -156,8 +193,14 @@ void Feeder::feederSuck()
     }
 }
 
+// ----------------------------------------------------------------------------
+//
+
 void Feeder::feederGoUp()
 {
+    #ifdef DEBUG_FEEDER
+        logger.log(LL_NOTICE, "feeder goUp");
+    #endif
 
     if (shake_ring_enable)
     {
@@ -204,8 +247,15 @@ void Feeder::feederGoUp()
     }
 }
 
+// ----------------------------------------------------------------------------
+//
+
 void Feeder::feederLoaded()
 {
+    #ifdef DEBUG_FEEDER
+        logger.log(LL_NOTICE, "feeder loaded");
+    #endif
+
     RT = m_controller.GetRightTriggerAxis();
 
     if (shake_ring_enable)
@@ -222,8 +272,15 @@ void Feeder::feederLoaded()
     setState(Fire);
 }
 
+// ----------------------------------------------------------------------------
+//
+
 void Feeder::feederFire()
 {
+    #ifdef DEBUG_FEEDER
+        logger.log(LL_NOTICE, "feeder fire");
+    #endif
+
     RT = m_controller.GetRightTriggerAxis();
 
     if (RT != 1)
@@ -234,6 +291,9 @@ void Feeder::feederFire()
         setState(Idle);
     }
 }
+
+// ----------------------------------------------------------------------------
+//
 
 void Feeder::feederPosAmp()
 {
@@ -254,6 +314,9 @@ void Feeder::feederPosAmp()
     }
 }
 
+// ----------------------------------------------------------------------------
+//
+
 void Feeder::startShakeRing()
 {
     if (shake_ring_enable == false)
@@ -272,8 +335,11 @@ void Feeder::startShakeRing()
     // start ring out
     intake_speed = SHAKE_RING_INTAKE;
     motor_intake.Set(-intake_speed);
-    logger.log(LL_INFO, "start shake ring");
+    //logger.log(LL_INFO, "start shake ring");
 }
+
+// ----------------------------------------------------------------------------
+//
 
 void Feeder::stopShakeRing()
 {
@@ -290,10 +356,13 @@ void Feeder::stopShakeRing()
             intake_speed = 0;
             motor_intake.Set(intake_speed);
 
-            logger.log(LL_INFO, "stop shake ring");
+            //logger.log(LL_INFO, "stop shake ring");
         }
     }
 }
+
+// ----------------------------------------------------------------------------
+//
 
 void Feeder::shakeRing()
 {
@@ -309,7 +378,7 @@ void Feeder::shakeRing()
     {
         if (delay >= SHAKE_RING_OUT_TIME)
         {
-            logger.log(LL_INFO, "shake ring in");
+            //logger.log(LL_INFO, "shake ring in");
             // ring go in
             shake_ring_out = false;
             shake_ring_start = now;
@@ -328,12 +397,15 @@ void Feeder::shakeRing()
             }
             else
             {
-                logger.log(LL_INFO, "shake ring out");
+                //logger.log(LL_INFO, "shake ring out");
                 startShakeRing();
             }
         }
     }
 }
+
+// ----------------------------------------------------------------------------
+//
 
 double Feeder::diffclock(std::clock_t clock1, std::clock_t clock2)
 {
@@ -342,15 +414,24 @@ double Feeder::diffclock(std::clock_t clock1, std::clock_t clock2)
     return diffms;
 }
 
+// ----------------------------------------------------------------------------
+//
+
 void Feeder::setMotorFeeder(double feeder_speed)
 {
     motor_feeder.Set(feeder_speed);
 }
 
+// ----------------------------------------------------------------------------
+//
+
 void Feeder::setMotorIntake(double intake_speed)
 {
     motor_intake.Set(intake_speed);
 }
+
+// ----------------------------------------------------------------------------
+//
 
 void Feeder::motorTemp()
 {
@@ -360,6 +441,9 @@ void Feeder::motorTemp()
     frc::SmartDashboard::PutNumber("tempMfeeder", temp_m_feeder);
     frc::SmartDashboard::PutNumber("tempMintake", temp_m_intake);
 }
+
+// ----------------------------------------------------------------------------
+//
 
 void Feeder::colorHandler()
 {
@@ -382,3 +466,6 @@ void Feeder::colorHandler()
         }
     }
 }
+
+// ----------------------------------------------------------------------------
+//

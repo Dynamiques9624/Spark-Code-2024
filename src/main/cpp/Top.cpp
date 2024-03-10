@@ -19,6 +19,8 @@ void Top:: handleTopInit(){
     y_button_handler = false;
   
 }
+// ----------------------------------------------------------------------------
+//
 
 void Top::handleEncoderValue(){
     
@@ -28,6 +30,8 @@ void Top::handleEncoderValue(){
     frc::SmartDashboard::PutBoolean("encoder lancer", connect_encoder_lancer);
     
 }
+// ----------------------------------------------------------------------------
+//
 
 void Top::handleMotorTemp(){
     
@@ -42,6 +46,8 @@ void Top::handleMotorTemp(){
     frc::SmartDashboard::PutNumber("tempMbasculRight", temp_m_bascul_right);
 
 }
+// ----------------------------------------------------------------------------
+//
 
 
 
@@ -64,6 +70,8 @@ void Top::PositionBascul(){
     }
     basculHandler();
 }
+// ----------------------------------------------------------------------------
+//
 
 void Top::basculHandler(){
 
@@ -100,6 +108,8 @@ void Top::basculHandler(){
         bascul_target_position = true;
     }
 }
+// ----------------------------------------------------------------------------
+//
 
 void Top::handlelancerSpeed(){
     yButtonHandler();
@@ -117,6 +127,8 @@ void Top::handlelancerSpeed(){
     }
  
 }
+// ----------------------------------------------------------------------------
+//
 
 void Top::yButtonHandler(){
     y_button = m_controller.GetYButton();
@@ -127,6 +139,8 @@ void Top::yButtonHandler(){
         y_button_handler = false;
     }
 }
+// ----------------------------------------------------------------------------
+//
 
 void Top::handleTopTaskTeleop(){
     feederHandler();
@@ -137,6 +151,8 @@ void Top::handleTopTaskTeleop(){
     ampHandler();
 
 }
+// ----------------------------------------------------------------------------
+//
 
 void Top::handleTopTaskAuto(){
     handleEncoderValue();
@@ -144,9 +160,8 @@ void Top::handleTopTaskAuto(){
     feederHandler();
     PositionBascul();    
 }
-
-
-//-------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+//
 
 void Top::ampHandler(){
     switch (amp_state)
@@ -186,12 +201,18 @@ void Top::ampHandler(){
     }
 }
 
+// ----------------------------------------------------------------------------
+//
+
 void Top::basculUp(){
     bascul_value = BASCUL_VALUE_AMP;
     basculHandler();
     setState(AmpState::BasculGoingUp);
 
 }
+
+// ----------------------------------------------------------------------------
+//
 
 void Top::basculIdle(){
     LB = m_controller.GetLeftBumper();
@@ -202,6 +223,9 @@ void Top::basculIdle(){
     }
 }
 
+// ----------------------------------------------------------------------------
+//
+
 void Top::basculGoingUp(){
     if (angle_encoder_lancer <= BASCUL_VALUE_DEPLOY_FEEDER_AMP){
         feederUp(false);
@@ -210,6 +234,9 @@ void Top::basculGoingUp(){
         setState(AmpState::FeederUp);
     }
 }
+
+// ----------------------------------------------------------------------------
+//
 
 void Top::feederUp(bool update_state){
     Feeder::feederEncoderReader();
@@ -231,6 +258,9 @@ void Top::feederUp(bool update_state){
     }
 }
 
+// ----------------------------------------------------------------------------
+//
+
 void Top::feederLoaded(){
     RT = m_controller.GetRightTriggerAxis();
 
@@ -244,6 +274,9 @@ void Top::feederLoaded(){
     
 }
 
+// ----------------------------------------------------------------------------
+//
+
 void Top::feederFire(){
     RT = m_controller.GetRightTriggerAxis();
     
@@ -254,6 +287,9 @@ void Top::feederFire(){
         
     }
 }
+
+// ----------------------------------------------------------------------------
+//
 
 void Top::feederDown(){
     Feeder::feederEncoderReader();
@@ -275,6 +311,9 @@ void Top::feederDown(){
     }
 }
 
+// ----------------------------------------------------------------------------
+//
+
 void Top::basculDown(bool update_state){
     bascul_value = MAX_VALUE_BASCUL;
     basculHandler();
@@ -284,6 +323,9 @@ void Top::basculDown(bool update_state){
     
 }
 
+// ----------------------------------------------------------------------------
+//
+
 void Top::basculGoingDown(){
     if (bascul_target_position){
         setState(AmpState::Idle);
@@ -291,8 +333,14 @@ void Top::basculGoingDown(){
     }
 }
 
+// ----------------------------------------------------------------------------
+//
+
 void Top::setState(AmpState state){
     //std::cout <<"amp_state " << state << "\n";
     frc::SmartDashboard::PutNumber("AmpState", state);
     amp_state = state; 
 }
+
+// ----------------------------------------------------------------------------
+//

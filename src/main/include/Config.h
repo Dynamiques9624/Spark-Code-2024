@@ -1,6 +1,9 @@
 
 // possition du m_controller sur driver station
 #define CONTROLLER_PORT_NO 0
+
+#define SECOND_CONTROLLER_PORT_NO 1
+
 //PWM pin led strip
 #define LED_STRIP_PWM 2
 
@@ -126,6 +129,13 @@
 #define WHEEL_DIAM_IN 6.0
 #define WHEEL_CIRC_IN 18.85
 
+// define pour les debug dans les logs
+
+//#define DEBUG_DRIVE_TRAIN
+#define DEBUG_FEEDER
+
 #define DEBUG
 
+
+//define pour utiliser les fonctionnaliter pathplanner 
 //#define PATHPLANNER
