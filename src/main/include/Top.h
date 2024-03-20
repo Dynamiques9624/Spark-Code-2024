@@ -7,6 +7,8 @@
 #include <frc/DutyCycleEncoder.h>
 #include <frc/TimedRobot.h>
 #include <frc/smartdashboard/SmartDashboard.h>
+#include <frc/motorcontrol/PWMSparkMax.h>
+#include <frc/DigitalOutput.h>
 
 #include <rev/CANSparkMax.h>
 
@@ -27,6 +29,7 @@ class Top : protected Feeder{
   void setState(AmpState state);
 
   void handleTopInit();
+  void handleTopAutoInit();
   void handleEncoderValue();
   void handleMotorTemp();
   
@@ -36,10 +39,15 @@ class Top : protected Feeder{
   void handleTopTaskTeleop();
   void handleTopTaskAuto();
   void handlelancerSpeed();
-  void lanceurAuto();
-  
+  void lanceurAutoOneNote();
 
+  void handleRelaySolo();
+
+  bool relay_activited;
   double bascul_value;
+  bool pos_auto_midle;
+  bool first_note_shoot_append;
+  bool second_note_shoot_append;
 
  private:
 
@@ -53,6 +61,7 @@ class Top : protected Feeder{
 
     double feeder_speed;
     double intake_speed;
+    double bascul_down_speed;
     
     double angle_encoder_lancer;
     bool RB;
@@ -60,6 +69,8 @@ class Top : protected Feeder{
     double RT;
     double LT;
     int pov;
+
+    bool pov_second;
     
     double bascul_value_aprox;
 
@@ -70,7 +81,18 @@ class Top : protected Feeder{
     double temp_m_bascul_left;
     double temp_m_bascul_right;
 
+    bool timer_started_propul;
+    time_t start_propul;
+
+    bool timer_started_fire;
+    time_t start_fire;
+
+    
+    bool timer_started_relay;
+    time_t start_relay;
+
     frc::XboxController m_controller{CONTROLLER_PORT_NO};
+    frc::XboxController m_second_controller{SECOND_CONTROLLER_PORT_NO};
         
     frc::DutyCycleEncoder m_dutyCycleEncoder_lancer{ENCODER_BASCUL};
 
@@ -80,6 +102,7 @@ class Top : protected Feeder{
     rev::CANSparkMax motor_bascul_left{MOTOR_BASCUL_LEFT, rev::CANSparkMax::MotorType::kBrushless}; 
     rev::CANSparkMax motor_bascul_right{MOTOR_BASCUL_RIGHT, rev::CANSparkMax::MotorType::kBrushless};
 
+    frc::DigitalOutput relay_solo{RELAY_PIN_DIO};
 
     void yButtonHandler();
 
@@ -92,4 +115,12 @@ class Top : protected Feeder{
     void feederDown();
     void basculDown(bool update_state = true);
     void basculGoingDown();
+
+    void startTimerPropul();
+    void startTimerFire();
+    void startTimerRelay();
+
+    void lanceurAutoFirstOfTwo();
+    void lanceurAutoTwoOfTwo();
+
 };  

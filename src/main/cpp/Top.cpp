@@ -11,14 +11,29 @@ void Top:: handleTopInit(){
     motor_bascul_left.RestoreFactoryDefaults();
     motor_bascul_right.RestoreFactoryDefaults();
 
-    bascul_value = -20;
+    bascul_value = -81.5;
     set_predefine_loaded = false;
 
+    timer_started_propul = false;
+    timer_started_fire = false;
+    timer_started_relay = false;
+
     bascul_target_position = false;
+
+    relay_activited = false;
     
     y_button_handler = false;
   
 }
+
+// ----------------------------------------------------------------------------
+//
+
+void Top::handleTopAutoInit(){
+
+    
+}
+
 // ----------------------------------------------------------------------------
 //
 
@@ -58,7 +73,7 @@ void Top::PositionBascul(){
     if (feeder_state != FeederState::Loaded && feeder_state != FeederState::Fire){
         set_predefine_loaded = true;
     }else if (set_predefine_loaded) {
-        bascul_value = -25;
+        bascul_value = -86.5;
         set_predefine_loaded = false;
     }
     
@@ -83,8 +98,8 @@ void Top::basculHandler(){
     
     if(bascul_value > angle_encoder_lancer && bascul_value_aprox < -2){
         //bascule monte (pointe vers haut)
-        motor_bascul_left.Set(0);
-        motor_bascul_right.Set(0);
+        motor_bascul_left.Set(-bascul_down_speed); //-0.08
+        motor_bascul_right.Set(bascul_down_speed); //0.08
         
     }
     if(bascul_value < angle_encoder_lancer && bascul_value_aprox > 2){
@@ -117,8 +132,8 @@ void Top::handlelancerSpeed(){
 
     if(feeder_state == FeederState::GoUp || feeder_state == FeederState::Loaded || feeder_state == FeederState::Fire){
         if (y_button_handler){
-            motor_lancer_an_right.Set(-0.8);
-            motor_lancer_an_left.Set(0.8);
+            motor_lancer_an_right.Set(-0.8); 
+            motor_lancer_an_left.Set(0.8); 
         }
     }
     else{
@@ -131,7 +146,7 @@ void Top::handlelancerSpeed(){
 //
 
 void Top::yButtonHandler(){
-    y_button = m_controller.GetYButton();
+    y_button = m_second_controller.GetYButton();
 
     if (y_button && !y_button_handler){
         y_button_handler = true;
@@ -142,6 +157,111 @@ void Top::yButtonHandler(){
 // ----------------------------------------------------------------------------
 //
 
+void Top::lanceurAutoOneNote(){
+
+    if (feeder_state == Loaded){
+
+        motor_lancer_an_right.Set(-0.6);
+        motor_lancer_an_left.Set(0.6);
+        bascul_value = -86.5;
+        startTimerPropul();
+        time_t delay_propul = time(NULL) - start_propul;
+
+        if( delay_propul >= WAIT_TIME_BEFORE_SHOOTING){
+            feederFireAuto();
+            startTimerFire();
+            time_t delay_fire = time(NULL) - start_fire;
+            if (delay_fire >= WAIT_TIME_SHOOTHING){
+                Feeder::setState(FeederState::Idle);
+                first_note_shoot_append = true;
+                bascul_value = -81.5;
+            }
+        } 
+    } 
+        
+
+}
+
+// ----------------------------------------------------------------------------
+//
+
+void Top::lanceurAutoFirstOfTwo(){
+
+    if (feeder_state == Loaded){
+
+        motor_lancer_an_right.Set(-0.6);
+        motor_lancer_an_left.Set(0.6);
+        bascul_value = -86.5;
+        startTimerPropul();
+        time_t delay_propul = time(NULL) - start_propul;
+
+        if( delay_propul >= WAIT_TIME_BEFORE_SHOOTING){
+            feederFireAuto();
+            startTimerFire();
+            time_t delay_fire = time(NULL) - start_fire;
+            if (delay_fire >= WAIT_TIME_SHOOTHING){
+                Feeder::setState(FeederState::GoDown);
+                first_note_shoot_append = true;
+                bascul_value = -81.5;
+            }
+        } 
+    } 
+        
+
+}
+// ----------------------------------------------------------------------------
+//
+
+void Top::lanceurAutoTwoOfTwo(){
+
+    if (feeder_state == Loaded){
+
+        motor_lancer_an_right.Set(-0.8);
+        motor_lancer_an_left.Set(0.8);
+        bascul_value = SHOOT_SECOND_NOTE_AUTO;
+        startTimerPropul();
+        time_t delay_propul = time(NULL) - start_propul;
+
+        if( delay_propul >= WAIT_TIME_BEFORE_SHOOTING){
+            feederFireAuto();
+            startTimerFire();
+            time_t delay_fire = time(NULL) - start_fire;
+            if (delay_fire >= WAIT_TIME_SHOOTHING){
+                Feeder::setState(FeederState::Idle);
+                second_note_shoot_append = true;
+                bascul_value = -81.5;
+            }
+        } 
+    } 
+        
+
+}
+
+
+// ----------------------------------------------------------------------------
+//
+
+void Top::startTimerPropul(){
+    
+    if (!timer_started_propul){
+        time(&start_propul);
+        timer_started_propul = true;
+    }
+}
+
+// ----------------------------------------------------------------------------
+//
+
+void Top::startTimerFire(){
+    if (!timer_started_fire){
+        time(&start_fire);
+        timer_started_fire = true;
+    }
+}
+
+// ----------------------------------------------------------------------------
+//
+
 void Top::handleTopTaskTeleop(){
     feederHandler();
     handleEncoderValue();
@@ -149,6 +269,7 @@ void Top::handleTopTaskTeleop(){
     handlelancerSpeed();
     PositionBascul();
     ampHandler();
+    handleRelaySolo();
 
 }
 // ----------------------------------------------------------------------------
@@ -158,8 +279,64 @@ void Top::handleTopTaskAuto(){
     handleEncoderValue();
     handlelancerSpeed();
     feederHandler();
-    PositionBascul();    
+    PositionBascul();
+
+    if (!pos_auto_midle){
+        lanceurAutoOneNote(); 
+    }else if (pos_auto_midle){
+        if (!first_note_shoot_append){
+            lanceurAutoFirstOfTwo();
+        }else if (!second_note_shoot_append){
+            lanceurAutoTwoOfTwo();
+        }
+        
+    }
+    
+    
 }
+
+// ----------------------------------------------------------------------------
+//
+
+void Top::handleRelaySolo(){
+
+    pov_second = m_second_controller.GetPOV();
+    
+
+    if (pov_second == 0){
+        if (!relay_activited){
+            std::cout <<"relay " << "on" << "\n";
+            relay_solo.Set(1);
+            relay_activited = true;
+            frc::SmartDashboard::PutNumber("relayState", relay_activited);
+            if (!timer_started_relay){
+                startTimerRelay();  
+            }
+        }
+        
+    }
+    time_t delay_relay = time(NULL) - start_relay;
+    if (delay_relay >= 5){
+        relay_solo.Set(0);
+        std::cout <<"relay " << "off" << "\n";
+    }
+
+}
+
+// ----------------------------------------------------------------------------
+//
+
+void Top::startTimerRelay(){
+
+    if (!timer_started_relay){
+        time(&start_relay);
+        timer_started_relay = true;
+    }
+
+}
+
+
+
 // ----------------------------------------------------------------------------
 //
 
@@ -216,7 +393,7 @@ void Top::basculUp(){
 
 void Top::basculIdle(){
     LB = m_controller.GetLeftBumper();
-
+    bascul_down_speed = BASCUL_SPEED_DOWN_IDLE;
     if(LB && feeder_state == FeederState::Loaded){
         setState(AmpState::BasculUp);
 
@@ -316,6 +493,7 @@ void Top::feederDown(){
 
 void Top::basculDown(bool update_state){
     bascul_value = MAX_VALUE_BASCUL;
+    bascul_down_speed = BASCUL_AMP_GOING_DOWN_SPEED;
     basculHandler();
     if (update_state){
       setState(AmpState::BasculGoingDown);  

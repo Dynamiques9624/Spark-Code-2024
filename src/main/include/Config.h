@@ -36,19 +36,24 @@
 #define ENCODER_BASCUL 1
 
 //valeur de la bascul la plus haute (60 degre et position de depart base)
-#define MAX_VALUE_BASCUL -20
+#define MAX_VALUE_BASCUL -81.5 //-20
 //valeur de la bascul le plus bas (pointe vers le bas)
-#define MIN_VALUE_BASCUL -95
+#define MIN_VALUE_BASCUL -190 //-95
 
 //Can id motor bascule
 #define MOTOR_BASCUL_LEFT 19
 #define MOTOR_BASCUL_RIGHT 20
 
 //position of the bascul when whant to scorre in the amp
-#define BASCUL_VALUE_AMP -90 
+#define BASCUL_VALUE_AMP -151.5 //-90 
 
 //position of the bascul when want the feeder to go in amp position
-#define BASCUL_VALUE_DEPLOY_FEEDER_AMP -35
+#define BASCUL_VALUE_DEPLOY_FEEDER_AMP -96.5 //-35
+
+#define BASCUL_AMP_GOING_DOWN_SPEED 0.30
+#define BASCUL_SPEED_DOWN_IDLE 0.15
+
+#define SHOOT_SECOND_NOTE_AUTO -90
 
 //PROPULSUER---------------------------------------------------------
 
@@ -62,6 +67,8 @@
 //Time for shooting in autonumus mode in seconds
 #define WAIT_TIME_SHOOTHING 2
 
+#define RELAY_PIN_DIO 5
+
 //FEEDER---------------------------------------------------------
 
 //digital pin des deux encoder
@@ -74,7 +81,7 @@
 //prendre anneau
 #define ENCODER_FEEDER_TAKE_VALUE 180 //189 valeur peut etre
 //drop anneau dans lancer
-#define ENCODER_FEEDER_LANCER_VALUE -3 //-4 val depart avant changement -5
+#define ENCODER_FEEDER_LANCER_VALUE -2 //-4 val depart avant changement -3
 
 //angle when the feader is vertical
 #define ENCODER_FEEDER_VERTICAL_ANGLE 90

@@ -40,6 +40,7 @@ class Feeder{
     void feederEncoderReader();
     void setMotorFeeder(double feeder_speed);
     void setMotorIntake(double intake_speed);
+    void feederFireAuto();
     
  private:
     bool connect_encoder_feeder;
@@ -59,6 +60,8 @@ class Feeder{
     
     double feeder_speed;
     double intake_speed;
+
+    bool feeder_sucking;
 
     double temp_m_feeder;
     double temp_m_intake;

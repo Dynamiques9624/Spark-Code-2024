@@ -19,12 +19,17 @@ void NT_Manager::ntManagerInit(){
 
     auto autonumous = table->GetDoubleTopic("autonomous");
     autonomous_pub = autonumous.Publish();
+
+    auto teleop = table->GetDoubleTopic("teleop_mode");
+    teleop_mode_pub = teleop.Publish();
     
     auto switch_intake = table->GetDoubleTopic("limit_switch");
     limit_switch_pub = switch_intake.Publish();
 
 }
 
+// ----------------------------------------------------------------------------
+//
 
 void NT_Manager::handleSubscriberTask(){
     this->left_wheel_speed_percent = left_wheel_speed_percent_sub.Get();

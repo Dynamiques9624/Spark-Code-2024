@@ -89,7 +89,7 @@ private:
   void handleTaskBaseTeleop();
   void baseInit();
   void handleDriveAuto();
-  void handleShowAutoValue();
+  void handleShowPiValue();
 
   frc::Pose2d getPose();
   void resetPose(frc::Pose2d pose);

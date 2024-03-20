@@ -14,6 +14,7 @@ void Feeder::feederInit()
     reset = false;
     shake_ring = true;
     shake_ring_enable = true;
+    feeder_sucking = false;
 
     m_led.SetLength(KLENGTH);
     m_led.SetData(m_ledBuffer);
@@ -31,6 +32,14 @@ void Feeder::feederEncoderReader()
 // ----------------------------------------------------------------------------
 //
 
+void Feeder::feederFireAuto(){
+    intake_speed = INTAKE_PUSH_SPEED;
+    motor_intake.Set(intake_speed);
+}
+
+// ----------------------------------------------------------------------------
+//
+
 void Feeder::feederHandler()
 {
     reset_button_x = m_controller.GetXButton();
@@ -43,6 +52,7 @@ void Feeder::feederHandler()
     motorTemp();
     feederEncoderReader();
     frc::SmartDashboard::PutNumber("encoFeederVal", angle_encoder_feeder);
+    frc::SmartDashboard::PutBoolean("feederSuck", feeder_sucking);
 
     switch (feeder_state)
     {
@@ -168,7 +178,7 @@ void Feeder::feederSuck()
     #ifdef DEBUG_FEEDER
         logger.log(LL_NOTICE, "feeder suck");
     #endif
-
+    feeder_sucking = true;
     eject_button_a = m_controller.GetAButton();
 
     if (eject_button_a)
@@ -189,6 +199,7 @@ void Feeder::feederSuck()
         m_nt.limit_switch_pub.Set(1);
         intake_speed = 0;
         motor_intake.Set(intake_speed);
+        feeder_sucking = false;
         setState(GoUp);
     }
 }

@@ -29,6 +29,8 @@ public:
   std::string pos_color;
   nt::DoublePublisher autonomous_pub;
   nt::DoublePublisher limit_switch_pub;
+
+  nt::DoublePublisher teleop_mode_pub;
   
 protected:
   

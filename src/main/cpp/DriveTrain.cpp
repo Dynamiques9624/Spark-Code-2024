@@ -51,15 +51,22 @@ bool DriveTrain::init(NT_Manager *nt, Feeder *feeder)
 //
 void DriveTrain::handleTaskDriveTrainAuto()
 {
-  handleShowAutoValue();
+  handleShowPiValue();
   handleMotorBaseTemp();
-  handleDriveAuto();
+  if (m_feeder->getFeederState() == Feeder::FeederState::Suck){
+    handleDriveAuto();
+  }
+  
+  
 }
 
 // ----------------------------------------------------------------------------
 //
 void DriveTrain::handleTaskDriveTrainTeleop()
-{
+{  
+  
+  handleShowPiValue();
+  
   if (!assistance_drive){
     handleTaskBaseTeleop();
     buttonAssistanceDrive();
@@ -261,7 +268,7 @@ void DriveTrain::handleDriveAuto()
 
 // ----------------------------------------------------------------------------
 //
-void DriveTrain::handleShowAutoValue()
+void DriveTrain::handleShowPiValue()
 {
 
   frc::SmartDashboard::PutNumber("ringDetected", m_nt->ring_detected);
