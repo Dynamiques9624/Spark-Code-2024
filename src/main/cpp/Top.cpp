@@ -173,70 +173,14 @@ void Top::lanceurAutoOneNote(){
             time_t delay_fire = time(NULL) - start_fire;
             if (delay_fire >= WAIT_TIME_SHOOTHING){
                 Feeder::setState(FeederState::Idle);
+                bascul_value = -81.5;
                 first_note_shoot_append = true;
-                bascul_value = -81.5;
             }
         } 
     } 
         
 
 }
-
-// ----------------------------------------------------------------------------
-//
-
-void Top::lanceurAutoFirstOfTwo(){
-
-    if (feeder_state == Loaded){
-
-        motor_lancer_an_right.Set(-0.6);
-        motor_lancer_an_left.Set(0.6);
-        bascul_value = -86.5;
-        startTimerPropul();
-        time_t delay_propul = time(NULL) - start_propul;
-
-        if( delay_propul >= WAIT_TIME_BEFORE_SHOOTING){
-            feederFireAuto();
-            startTimerFire();
-            time_t delay_fire = time(NULL) - start_fire;
-            if (delay_fire >= WAIT_TIME_SHOOTHING){
-                Feeder::setState(FeederState::GoDown);
-                first_note_shoot_append = true;
-                bascul_value = -81.5;
-            }
-        } 
-    } 
-        
-
-}
-// ----------------------------------------------------------------------------
-//
-
-void Top::lanceurAutoTwoOfTwo(){
-
-    if (feeder_state == Loaded){
-
-        motor_lancer_an_right.Set(-0.8);
-        motor_lancer_an_left.Set(0.8);
-        bascul_value = SHOOT_SECOND_NOTE_AUTO;
-        startTimerPropul();
-        time_t delay_propul = time(NULL) - start_propul;
-
-        if( delay_propul >= WAIT_TIME_BEFORE_SHOOTING){
-            feederFireAuto();
-            startTimerFire();
-            time_t delay_fire = time(NULL) - start_fire;
-            if (delay_fire >= WAIT_TIME_SHOOTHING){
-                Feeder::setState(FeederState::Idle);
-                second_note_shoot_append = true;
-                bascul_value = -81.5;
-            }
-        } 
-    } 
-        
-
-}
-
 
 // ----------------------------------------------------------------------------
 //
@@ -281,18 +225,7 @@ void Top::handleTopTaskAuto(){
     feederHandler();
     PositionBascul();
 
-    if (!pos_auto_midle){
-        lanceurAutoOneNote(); 
-    }else if (pos_auto_midle){
-        if (!first_note_shoot_append){
-            lanceurAutoFirstOfTwo();
-        }else if (!second_note_shoot_append){
-            lanceurAutoTwoOfTwo();
-        }
-        
-    }
-    
-    
+    lanceurAutoOneNote(); 
 }
 
 // ----------------------------------------------------------------------------

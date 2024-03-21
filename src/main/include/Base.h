@@ -9,6 +9,7 @@
 #include <frc/smartdashboard/SmartDashboard.h>
 
 #include <math.h>
+#include <time.h>
 #include <iostream>
 
 #include <RobotContainer.h>
@@ -31,10 +32,23 @@ public:
   
 protected:
   tools::FileLogger     logger{"Base"};
+
+  enum AutoState{
+    Idle, FirstNote, DropFeeder, SuckNote, GoForward, SecondNote
+  };
+  AutoState m_auto_state;
+
+  void setState(AutoState state);
   
 private:
+
+  bool timer_started_go_forward;
+  time_t start_go_forward;
+  
   DriveTrain            m_driveTrain;
   bool                  m_autonomous;
   std::optional<frc2::CommandPtr> m_autonomousCommand;
   RobotContainer        m_container;
+
+  void startTimerGoForward();
 };

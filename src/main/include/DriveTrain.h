@@ -28,6 +28,8 @@ public:
   void handleTaskDriveTrainAuto();
   void handleTaskDriveTrainTeleop();
   void handleTaskDriveTrainInit();
+  void goForward();
+  void stop();
 
 protected:
   //loger avec nom de la classe

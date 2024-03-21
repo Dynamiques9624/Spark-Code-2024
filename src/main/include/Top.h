@@ -45,9 +45,13 @@ class Top : protected Feeder{
 
   bool relay_activited;
   double bascul_value;
-  bool pos_auto_midle;
   bool first_note_shoot_append;
-  bool second_note_shoot_append;
+
+  bool timer_started_propul;
+  time_t start_propul;
+
+  bool timer_started_fire;
+  time_t start_fire;
 
  private:
 
@@ -81,13 +85,6 @@ class Top : protected Feeder{
     double temp_m_bascul_left;
     double temp_m_bascul_right;
 
-    bool timer_started_propul;
-    time_t start_propul;
-
-    bool timer_started_fire;
-    time_t start_fire;
-
-    
     bool timer_started_relay;
     time_t start_relay;
 
