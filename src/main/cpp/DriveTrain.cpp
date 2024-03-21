@@ -270,8 +270,8 @@ void DriveTrain::handleDriveAuto()
 //
 
 void DriveTrain::goForward(){
-  m_left_lead_motor.Set(-0.1);
-  m_right_lead_motor.Set(0.1);
+  m_left_lead_motor.Set(0.1);
+  m_right_lead_motor.Set(-0.1);
 }
 
 // ----------------------------------------------------------------------------
